@@ -79,18 +79,12 @@
   <h1>Resumen de Campañas de Facebook</h1>
   <div class="input-area">
     <input type="text" id="companyName" placeholder="Nombre de la Compañía" />
-    <textarea id="campaignData" rows="10" placeholder='Ejemplo: [ {"name": "Campaña 1", "costo": 23, "leads": 45, "total": 1035} ]'></textarea>
+
+    <div id="campaignInputs"></div>
+
+    <button onclick="agregarCampaña()">Agregar Campaña</button>
     <button onclick="generarResumen()">Generar Resumen</button>
     <button onclick="exportarResumen()" id="exportHTML">Exportar como HTML</button>
-    <div>
-      <label for="editCosto">Costo por Resultado:</label>
-      <input type="text" id="editCosto" placeholder="$0.00" />
-      <label for="editTotal">Total Invertido:</label>
-      <input type="text" id="editTotal" placeholder="$0.00" />
-      <label for="editLeads">Cantidad de Leads:</label>
-      <input type="text" id="editLeads" placeholder="0" />
-      <button onclick="actualizarResumenManual()">Actualizar Datos Manualmente</button>
-    </div>
   </div>
 
   <h2 id="nombreEmpresa"></h2>
@@ -115,16 +109,41 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     let chart;
+    let campaignCount = 0;
+
+    function agregarCampaña() {
+      const container = document.getElementById("campaignInputs");
+      const div = document.createElement("div");
+      div.innerHTML = `
+        <h4>Campaña ${campaignCount + 1}</h4>
+        <input type="text" placeholder="Nombre de la campaña" id="name${campaignCount}" />
+        <input type="number" placeholder="Costo por resultado" id="costo${campaignCount}" />
+        <input type="number" placeholder="Leads generados" id="leads${campaignCount}" />
+        <input type="number" placeholder="Total invertido" id="total${campaignCount}" />
+        <hr/>
+      `;
+      container.appendChild(div);
+      campaignCount++;
+    }
 
     function generarResumen() {
       const companyName = document.getElementById("companyName").value;
       document.getElementById("nombreEmpresa").innerText = companyName;
 
-      let data;
-      try {
-        data = JSON.parse(document.getElementById("campaignData").value);
-      } catch (error) {
-        alert("Formato de datos incorrecto. Asegúrate de pegar un JSON válido.");
+      const data = [];
+      for (let i = 0; i < campaignCount; i++) {
+        const name = document.getElementById(`name${i}`).value;
+        const costo = parseFloat(document.getElementById(`costo${i}`).value);
+        const leads = parseInt(document.getElementById(`leads${i}`).value);
+        const total = parseFloat(document.getElementById(`total${i}`).value);
+
+        if (!name || isNaN(costo) || isNaN(leads) || isNaN(total)) continue;
+
+        data.push({ name, costo, leads, total });
+      }
+
+      if (data.length === 0) {
+        alert("Por favor ingresa al menos una campaña válida.");
         return;
       }
 
@@ -165,16 +184,6 @@
           }
         }
       });
-    }
-
-    function actualizarResumenManual() {
-      const costo = document.getElementById("editCosto").value;
-      const total = document.getElementById("editTotal").value;
-      const leads = document.getElementById("editLeads").value;
-
-      if (costo) document.getElementById("costoResultado").innerText = costo;
-      if (total) document.getElementById("totalInvertido").innerText = total;
-      if (leads) document.getElementById("cantidadLeads").innerText = leads;
     }
 
     function exportarResumen() {
