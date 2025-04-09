@@ -23,13 +23,15 @@
       padding: 20px;
       border-radius: 12px;
     }
-    .input-area input {
+    .input-area input,
+    .input-area textarea {
       display: block;
       width: 100%;
       padding: 10px;
       margin-bottom: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
+      font-size: 1rem;
     }
     .input-area button {
       background-color: #FFD700;
@@ -39,6 +41,7 @@
       padding: 10px 20px;
       border-radius: 8px;
       cursor: pointer;
+      margin-right: 10px;
     }
     .container {
       display: grid;
@@ -65,16 +68,27 @@
       display: block;
       margin: 0 auto;
     }
+    #exportHTML {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <h1>Resumen de Campañas de Facebook</h1>
   <div class="input-area">
     <input type="text" id="companyName" placeholder="Nombre de la Compañía" />
-    <textarea id="campaignData" rows="6" placeholder='Pega aquí los datos de tus campañas en formato JSON...
-Ejemplo: [ {"name": "Campaña 1", "costo": 23, "leads": 45, "total": 1035} ]'></textarea>
+    <textarea id="campaignData" rows="10" placeholder='Ejemplo: [ {"name": "Campaña 1", "costo": 23, "leads": 45, "total": 1035} ]'></textarea>
     <button onclick="generarResumen()">Generar Resumen</button>
-    <button onclick="exportarResumen()">Exportar como HTML</button>
+    <button onclick="exportarResumen()" id="exportHTML">Exportar como HTML</button>
+    <div>
+      <label for="editCosto">Costo por Resultado:</label>
+      <input type="text" id="editCosto" placeholder="$0.00" />
+      <label for="editTotal">Total Invertido:</label>
+      <input type="text" id="editTotal" placeholder="$0.00" />
+      <label for="editLeads">Cantidad de Leads:</label>
+      <input type="text" id="editLeads" placeholder="0" />
+      <button onclick="actualizarResumenManual()">Actualizar Datos Manualmente</button>
+    </div>
   </div>
 
   <h2 id="nombreEmpresa"></h2>
@@ -151,14 +165,29 @@ Ejemplo: [ {"name": "Campaña 1", "costo": 23, "leads": 45, "total": 1035} ]'></
       });
     }
 
+    function actualizarResumenManual() {
+      const costo = document.getElementById("editCosto").value;
+      const total = document.getElementById("editTotal").value;
+      const leads = document.getElementById("editLeads").value;
+
+      if (costo) document.getElementById("costoResultado").innerText = costo;
+      if (total) document.getElementById("totalInvertido").innerText = total;
+      if (leads) document.getElementById("cantidadLeads").innerText = leads;
+    }
+
     function exportarResumen() {
       const nombreEmpresa = document.getElementById("nombreEmpresa").innerText;
+      const costo = document.getElementById("costoResultado").innerText;
+      const total = document.getElementById("totalInvertido").innerText;
+      const leads = document.getElementById("cantidadLeads").innerText;
+
       const resumen = `
         <h1>${nombreEmpresa}</h1>
-        <p><strong>Costo por Resultado:</strong> ${document.getElementById("costoResultado").innerText}</p>
-        <p><strong>Total Invertido:</strong> ${document.getElementById("totalInvertido").innerText}</p>
-        <p><strong>Cantidad de Leads:</strong> ${document.getElementById("cantidadLeads").innerText}</p>
+        <p><strong>Costo por Resultado:</strong> ${costo}</p>
+        <p><strong>Total Invertido:</strong> ${total}</p>
+        <p><strong>Cantidad de Leads:</strong> ${leads}</p>
       `;
+
       const nuevaVentana = window.open("", "_blank");
       nuevaVentana.document.write(`<!DOCTYPE html><html><head><title>Resumen</title></head><body>${resumen}</body></html>`);
       nuevaVentana.document.close();
